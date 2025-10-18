@@ -8,7 +8,17 @@ DungeonInstance::~DungeonInstance() {
   join();
 }
 
-void DungeonInstance::startRun(const Party& /*party*/, std::chrono::seconds duration) {
+void DungeonInstance::startRun(const Party&, std::chrono::seconds duration) {
+  // move out any previous finished worker to join it without holding the mutex
+  std::thread toJoin;
+  {
+    std::scoped_lock lock(mtx_);
+    if (worker_.joinable() && !active_.load()) {
+      toJoin = std::move(worker_);
+    }
+  }
+  if (toJoin.joinable()) toJoin.join();
+
   std::scoped_lock lock(mtx_);
   // TODO: validate no active run; otherwise wait or return error depending on design.
   if (active_) return;
