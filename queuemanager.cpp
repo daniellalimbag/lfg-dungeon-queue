@@ -67,7 +67,6 @@ std::vector<InstanceSummary> QueueManager::summaries(bool waitForAll) {
 }
 
 bool QueueManager::canFormParty_() const {
-  // TODO: prevent starvation by considering queue ages/priorities.
   return !tanks_.empty() && !healers_.empty() && dps_.size() >= 3;
 }
 

@@ -1,5 +1,7 @@
  #include "dungeoninstance.h"
 #include <iostream>
+#include <string>
+#include "utils.h"
 
 using namespace std::chrono_literals;
 
@@ -25,12 +27,12 @@ void DungeonInstance::startRun(const Party&, std::chrono::seconds duration) {
   active_ = true;
   int id = id_;
   worker_ = std::thread([this, duration, id]() {
-    std::cout << "Instance " << id << ": start, duration_s=" << duration.count() << "\n";
+    Utils::logln(std::string("Instance ") + std::to_string(id) + ": start, duration_s=" + std::to_string(duration.count()));
     std::this_thread::sleep_for(duration);
     totalTimeSec_ += static_cast<int>(duration.count());
     partiesServed_ += 1;
     active_ = false;
-    std::cout << "Instance " << id << ": finish, duration_s=" << duration.count() << "\n";
+    Utils::logln(std::string("Instance ") + std::to_string(id) + ": finish, duration_s=" + std::to_string(duration.count()));
     auto cb = onFinish_;
     if (cb) cb(id_);
   });

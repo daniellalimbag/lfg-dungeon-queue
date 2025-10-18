@@ -38,7 +38,6 @@ public:
   bool isDone() const;
 
 private:
-  // TODO: design fair matchmaking to avoid starvation and deadlocks.
   // maybe form complete parties from role queues, assign to first available instance?
   void matchmakingLoop_();
 

@@ -27,8 +27,7 @@
    int dpsCount() const;
  
  private:
-   // NOTE: if party is shared across threads, protect access with this mutex
-   // TODO: decide ownership/synchronization model (immutable once formed vs concurrent writes)
+   // if party is shared across threads, protect access with this mutex
    mutable std::mutex mtx_;
  
    std::vector<Player> members_;
