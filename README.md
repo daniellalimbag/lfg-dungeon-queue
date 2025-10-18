@@ -2,17 +2,6 @@
 
 This is a Looking for Group dungeon queue system for STDISCM Problem Set 2.
 
-## Overview
-
-The system simulates a dungeon queue where players are assigned to roles (Tank, Healer, DPS) and form parties to enter dungeon instances. Key features include:
-
-- **Concurrent Dungeon Instances**: Multiple instances run simultaneously with random completion times.
-- **Party Formation**: Forms complete parties (1 Tank, 1 Healer, 3 DPS) from role-based queues.
-- **Synchronization**: Uses condition variables and callbacks to avoid busy-waiting and ensure thread safety.
-- **Fairness**: Assigns parties to instances in round-robin order to prevent starvation.
-- **Real-time Monitoring**: Displays instance activity and final summaries.
-- **Logging**: Per-instance start/finish logs for visibility.
-
 ## Building and Running
 
 ### 1. Clone or Open the Project
