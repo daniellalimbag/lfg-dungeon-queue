@@ -58,6 +58,7 @@ private:
 
   // instances
   std::vector<std::unique_ptr<DungeonInstance>> instances_;
+  int nextInstanceIdx_ {0};
 
   // matchmaking control
   std::thread matchmaker_;

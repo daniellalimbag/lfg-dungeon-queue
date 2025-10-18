@@ -1,4 +1,5 @@
  #include "dungeoninstance.h"
+#include <iostream>
 
 using namespace std::chrono_literals;
 
@@ -20,15 +21,16 @@ void DungeonInstance::startRun(const Party&, std::chrono::seconds duration) {
   if (toJoin.joinable()) toJoin.join();
 
   std::scoped_lock lock(mtx_);
-  // TODO: validate no active run; otherwise wait or return error depending on design.
   if (active_) return;
   active_ = true;
-  worker_ = std::thread([this, duration]() {
-    // TODO: add detailed per-party simulation/logging if needed
+  int id = id_;
+  worker_ = std::thread([this, duration, id]() {
+    std::cout << "Instance " << id << ": start, duration_s=" << duration.count() << "\n";
     std::this_thread::sleep_for(duration);
     totalTimeSec_ += static_cast<int>(duration.count());
     partiesServed_ += 1;
     active_ = false;
+    std::cout << "Instance " << id << ": finish, duration_s=" << duration.count() << "\n";
     auto cb = onFinish_;
     if (cb) cb(id_);
   });

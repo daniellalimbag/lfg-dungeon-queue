@@ -59,7 +59,7 @@
   auto summaries = qm.summaries(true);
   std::cout << "Final Summary:\n";
   for (const auto& s : summaries) {
-    std::cout << "Instance " << s.instanceId
+    std::cout << "Dungeon Instance " << s.instanceId
               << ": parties=" << s.partiesServed
               << ", total_time_s=" << s.totalTimeSec << "\n";
   }

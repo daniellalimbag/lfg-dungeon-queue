@@ -90,7 +90,6 @@ std::chrono::seconds QueueManager::randomClearTime_() const {
 }
 
 void QueueManager::matchmakingLoop_() {
-  // TODO: use condition variables to sleep until: new players arrive OR an instance becomes free OR stop requested.
   while (running_) {
     Party party;
     int freeIdx = -1;
@@ -102,9 +101,16 @@ void QueueManager::matchmakingLoop_() {
       if (!running_) break;
       if (isDone_unsafe_()) break;
       if (!(canFormParty_() && hasFreeInstance_())) continue;
+      // form a party and select free instance in round-robin order
       party = formParty_();
-      for (size_t i = 0; i < instances_.size(); ++i) {
-        if (!instances_[i]->isActive()) { freeIdx = static_cast<int>(i); break; }
+      const int n = static_cast<int>(instances_.size());
+      if (nextInstanceIdx_ >= n) nextInstanceIdx_ = 0;
+      for (int k = 0; k < n; ++k) {
+        const int i = (nextInstanceIdx_ + k) % n;
+        if (!instances_[i]->isActive()) { freeIdx = i; break; }
+      }
+      if (freeIdx >= 0) {
+        nextInstanceIdx_ = (freeIdx + 1) % n;
       }
     }
 
@@ -113,7 +119,8 @@ void QueueManager::matchmakingLoop_() {
       instances_[freeIdx]->startRun(party, dur);
       cv_.notify_all();
     } else {
-      // no free instance right now; wait for callback to notify
+      // no free instance right now
+      // wait for callback to notify
     }
   }
 }
@@ -131,7 +138,8 @@ bool QueueManager::isDone() const {
 bool QueueManager::isDone_unsafe_() const {
   bool canForm = !tanks_.empty() && !healers_.empty() && dps_.size() >= 3;
   if (canForm) return false;
-  // no party can be formed; done only if all instances are idle
+  // no party can be formed
+  //done only if all instances are idle
   for (auto& inst : instances_) if (inst->isActive()) return false;
   return true;
 }
