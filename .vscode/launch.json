@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run LFG Dungeon Queue",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/lfg_dungeon_queue.exe",
+      "args": ["3", "2", "2", "6", "3", "10"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": true,
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb.exe",
+      "preLaunchTask": "Build LFG Dungeon Queue (MinGW)"
+    }
+  ]
+}
