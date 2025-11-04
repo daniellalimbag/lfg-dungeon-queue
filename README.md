@@ -2,6 +2,7 @@
 
 This is a Looking for Group dungeon queue system for STDISCM Problem Set 2.
 
+<<<<<<< HEAD
 ## Overview
 
 The system simulates a dungeon queue where players are assigned to roles (Tank, Healer, DPS) and form parties to enter dungeon instances. Key features include:
@@ -14,6 +15,8 @@ The system simulates a dungeon queue where players are assigned to roles (Tank, 
 - **Logging**: Per-instance start/finish logs for visibility.
 - **Bonus – Dynamic Player Feeder**: Separate thread that adds new players randomly.
 
+=======
+>>>>>>> d3fe322c8d072d20da8a1f4c2dea32cb650b05c5
 ## Building and Running
 
 ### 1. Clone or Open the Project
