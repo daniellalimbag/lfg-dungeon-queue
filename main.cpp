@@ -41,6 +41,7 @@ int main(int argc, char* argv[]) {
   qm.setClearTimeRange(t1, t2);
   qm.start(n);
   qm.seedPlayers(t, h, d);
+  qm.startFeeder(50, 200, 800);
 
   using namespace std::chrono_literals;
   while (!qm.isDone()) {

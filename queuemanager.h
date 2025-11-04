@@ -37,9 +37,12 @@ public:
   // returns true when no more parties can be formed and all instances are idle
   bool isDone() const;
 
+  void startFeeder(int maxAdds, int minMs, int maxMs);
+
 private:
   // maybe form complete parties from role queues, assign to first available instance?
   void matchmakingLoop_();
+  void feederLoop_();
 
   // helpers
   bool canFormParty_() const;
@@ -63,6 +66,13 @@ private:
   std::thread matchmaker_;
   std::condition_variable cv_;
   std::atomic<bool> running_ {false};
+
+  std::thread feeder_;
+  std::atomic<bool> feederOn_ {false};
+  std::atomic<bool> feederFinished_ {true};
+  int feederMaxAdds_ {0};
+  int feederMinMs_ {300};
+  int feederMaxMs_ {1200};
 
   // time range
   int t1_ {3};

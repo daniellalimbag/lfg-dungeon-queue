@@ -12,6 +12,7 @@ The system simulates a dungeon queue where players are assigned to roles (Tank, 
 - **Fairness**: Assigns parties to instances in round-robin order to prevent starvation.
 - **Real-time Monitoring**: Displays instance activity and final summaries.
 - **Logging**: Per-instance start/finish logs for visibility.
+- **Bonus – Dynamic Player Feeder**: Separate thread that adds new players randomly.
 
 ## Building and Running
 

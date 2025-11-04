@@ -20,6 +20,7 @@ void QueueManager::start(int nInstances) {
     instances_.push_back(std::move(inst));
   }
   running_ = true;
+  feederFinished_ = true;
   matchmaker_ = std::thread(&QueueManager::matchmakingLoop_, this);
 }
 
@@ -41,9 +42,11 @@ void QueueManager::stop() {
     std::scoped_lock lock(mtx_);
     if (!running_) return;
     running_ = false;
+    feederOn_ = false;
     cv_.notify_all();
   }
   if (matchmaker_.joinable()) matchmaker_.join();
+  if (feeder_.joinable()) feeder_.join();
   for (auto& inst : instances_) inst->join();
 }
 
@@ -137,8 +140,64 @@ bool QueueManager::isDone() const {
 bool QueueManager::isDone_unsafe_() const {
   bool canForm = !tanks_.empty() && !healers_.empty() && dps_.size() >= 3;
   if (canForm) return false;
+  // if feeder is still running or hasn't finished, we are not done yet
+  if (!feederFinished_) return false;
   // no party can be formed
   //done only if all instances are idle
   for (auto& inst : instances_) if (inst->isActive()) return false;
   return true;
+}
+
+void QueueManager::startFeeder(int maxAdds, int minMs, int maxMs) {
+  std::scoped_lock lock(mtx_);
+  if (!running_) return;
+  if (feederOn_) return;
+  if (minMs < 1) minMs = 1;
+  if (maxMs < minMs) maxMs = minMs;
+  feederMaxAdds_ = maxAdds;
+  feederMinMs_ = minMs;
+  feederMaxMs_ = maxMs;
+  feederOn_ = true;
+  feederFinished_ = false;
+  feeder_ = std::thread(&QueueManager::feederLoop_, this);
+}
+
+void QueueManager::feederLoop_() {
+  std::mt19937 gen(std::random_device{}());
+  std::uniform_int_distribution<int> sleepDist;
+  {
+    std::scoped_lock lock(mtx_);
+    sleepDist = std::uniform_int_distribution<int>(feederMinMs_, feederMaxMs_);
+  }
+  std::discrete_distribution<int> roleDist({1, 1, 3});
+  int added = 0;
+  while (true) {
+    // check stop conditions under lock
+    {
+      std::scoped_lock lock(mtx_);
+      if (!running_ || !feederOn_ || added >= feederMaxAdds_) break;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleepDist(gen)));
+    PlayerRole role;
+    int r = roleDist(gen);
+    role = (r == 0) ? PlayerRole::TANK : (r == 1 ? PlayerRole::HEALER : PlayerRole::DPS);
+    {
+      std::scoped_lock lock(mtx_);
+      if (!running_ || !feederOn_) break;
+      int id = nextPlayerId_();
+      switch (role) {
+        case PlayerRole::TANK:   tanks_.emplace(id, PlayerRole::TANK); break;
+        case PlayerRole::HEALER: healers_.emplace(id, PlayerRole::HEALER); break;
+        case PlayerRole::DPS:    dps_.emplace(id, PlayerRole::DPS); break;
+      }
+      added++;
+      cv_.notify_all();
+    }
+  }
+  {
+    std::scoped_lock lock(mtx_);
+    feederOn_ = false;
+    feederFinished_ = true;
+    cv_.notify_all();
+  }
 }
